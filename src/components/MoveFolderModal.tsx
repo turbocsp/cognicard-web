@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 interface Folder {
   id: string;
@@ -27,51 +27,29 @@ const MoveFolderModal = ({
     if (folderToMove) {
       setTargetFolderId(folderToMove.parent_folder_id || "root");
     }
-  }, [folderToMove]);
+  }, [folderToMove, isOpen]);
 
   if (!isOpen || !folderToMove) {
     return null;
   }
 
-  // Helper function to find all descendant folder IDs recursively
-  const getDescendantIds = (folderId: string, folders: Folder[]): string[] => {
-    let descendantIds: string[] = [];
-    const children = folders.filter((f) => f.parent_folder_id === folderId);
-    for (const child of children) {
-      descendantIds.push(child.id);
-      descendantIds = descendantIds.concat(getDescendantIds(child.id, folders));
-    }
-    return descendantIds;
-  };
-
-  const invalidTargetIds = [
-    folderToMove.id,
-    ...getDescendantIds(folderToMove.id, allFolders),
-  ];
-
-  // Filter out the folder itself and its descendants from the list of possible destinations
-  const availableFolders = allFolders.filter(
-    (f) => !invalidTargetIds.includes(f.id)
-  );
-
-  // Helper function to render options recursively for visual hierarchy
-  const renderOptions = (
-    parentId: string | null = null,
-    depth = 0
-  ): JSX.Element[] => {
-    return availableFolders
-      .filter((f) => f.parent_folder_id === parentId)
-      .flatMap((folder) => [
-        <option key={folder.id} value={folder.id}>
-          {"—".repeat(depth)} {folder.name}
-        </option>,
-        ...renderOptions(folder.id, depth + 1),
-      ]);
-  };
-
   const handleConfirm = () => {
     onConfirm(targetFolderId === "root" ? null : targetFolderId);
   };
+
+  // Lógica para desabilitar a pasta atual e suas subpastas
+  const getSubfolderIds = (folderId: string): string[] => {
+    let children = allFolders.filter((f) => f.parent_folder_id === folderId);
+    let ids = children.map((c) => c.id);
+    children.forEach((c) => {
+      ids = [...ids, ...getSubfolderIds(c.id)];
+    });
+    return ids;
+  };
+
+  const disabledFolderIds = folderToMove
+    ? [folderToMove.id, ...getSubfolderIds(folderToMove.id)]
+    : [];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
@@ -91,7 +69,15 @@ const MoveFolderModal = ({
             className="w-full px-3 py-2 border rounded-md bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="root">Nenhuma Pasta (Raiz)</option>
-            {renderOptions()}
+            {allFolders.map((folder) => (
+              <option
+                key={folder.id}
+                value={folder.id}
+                disabled={disabledFolderIds.includes(folder.id)}
+              >
+                {folder.name}
+              </option>
+            ))}
           </select>
         </div>
 

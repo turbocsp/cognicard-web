@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 
@@ -30,7 +30,7 @@ const BadgesDisplay = () => {
       } else {
         const userBadges = data
           .map((item) => item.badges)
-          .filter(Boolean) as Badge[];
+          .filter((badge): badge is Badge => badge !== null);
         setBadges(userBadges);
       }
       setLoading(false);

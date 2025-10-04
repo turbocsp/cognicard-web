@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from "react";
 import HeatMap from "@uiw/react-heat-map";
 import Tooltip from "@uiw/react-tooltip";
 import { supabase } from "../supabaseClient";
-import {
-  subYears,
-  subMonths,
-  subDays,
-  format,
-  startOfDay,
-  endOfDay,
-} from "date-fns";
+import { subYears, subMonths, format, startOfDay, endOfDay } from "date-fns";
 import { useAuth } from "../context/AuthContext";
-import useMeasure from "react-use-measure"; // 1. Importar a nova biblioteca
+import useMeasure from "react-use-measure";
+import { useState, useEffect } from "react";
+
+// Tipo para os dados renderizados no tooltip
+type HeatmapData = {
+  date: string;
+  count: number;
+};
 
 const ActivityHeatmap = () => {
   const { session } = useAuth();
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<HeatmapData[]>([]);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState(subYears(new Date(), 1));
   const today = endOfDay(new Date());
 
-  // 2. Configurar o hook de medição
   const [ref, { width }] = useMeasure();
 
   useEffect(() => {
-    // ... (a lógica de busca de dados permanece a mesma)
     const fetchActivityData = async () => {
       if (!session) {
         setLoading(false);
@@ -32,12 +29,9 @@ const ActivityHeatmap = () => {
       }
       setLoading(true);
       let newStartDate;
-      const timeRange = width < 500 ? "month" : "year"; // Ajuste dinâmico se quisermos no futuro
+      const timeRange = width < 500 ? "month" : "year";
 
       switch (timeRange) {
-        case "week":
-          newStartDate = startOfDay(subDays(today, 6));
-          break;
         case "month":
           newStartDate = startOfDay(subMonths(today, 1));
           break;
@@ -68,8 +62,10 @@ const ActivityHeatmap = () => {
       }
       setLoading(false);
     };
-    fetchActivityData();
-  }, [session, width]); // Re-executa se a largura mudar
+    if (width > 0) {
+      fetchActivityData();
+    }
+  }, [session, width]);
 
   if (loading) {
     return (
@@ -80,16 +76,15 @@ const ActivityHeatmap = () => {
   }
 
   return (
-    // 3. Anexar a referência ao div container e passar a largura para o HeatMap
     <div ref={ref} className="w-full h-full flex items-center justify-center">
       {width > 0 && (
         <HeatMap
           value={data}
-          width={width} // A largura agora é dinâmica!
+          width={width}
           style={{ color: "#888" }}
           startDate={startDate}
           endDate={today}
-          rectSize={Math.min(width / 53, 12)} // Calcula o tamanho do quadrado dinamicamente
+          rectSize={Math.min(width / 53, 12)}
           space={3}
           panelColors={{
             0: "#ebedf0",
@@ -98,7 +93,10 @@ const ActivityHeatmap = () => {
             10: "#30a14e",
             20: "#216e39",
           }}
-          rectRender={(props, data) => {
+          rectRender={(
+            props: React.SVGProps<SVGRectElement>,
+            data: HeatmapData
+          ) => {
             if (!data.date) return <rect {...props} />;
             const dateObj = new Date(data.date);
             const userOffset = dateObj.getTimezoneOffset() * 60000;

@@ -1,5 +1,4 @@
 // src/components/AnswerDisplay.tsx
-import React from "react";
 
 interface AnswerDisplayProps {
   deckType?: "general" | "right_wrong";

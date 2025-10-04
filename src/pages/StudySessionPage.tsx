@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { calculateNextIntervals, formatInterval } from "../utils/srs";
@@ -37,7 +37,7 @@ const DEFAULT_SETTINGS: SrsSettings = {
 };
 
 const StudySessionPage = () => {
-  const { deckId } = useParams<{ deckId: string }>();
+  const { deckId } = useParams<{ deckId: string }>(); // LINHA CORRIGIDA
   const { session } = useAuth();
   const [deck, setDeck] = useState<Deck | null>(null);
   const [cardsToReview, setCardsToReview] = useState<Card[]>([]);

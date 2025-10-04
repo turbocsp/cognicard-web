@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import {
   PieChart,
   Pie,
@@ -65,7 +65,9 @@ const MaturityChart = () => {
           fill="#8884d8"
           dataKey="count"
           nameKey="status"
-          label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+          label={({ percent }: { percent: number }) =>
+            `${(percent * 100).toFixed(0)}%`
+          }
         >
           {data.map((entry) => (
             <Cell key={`cell-${entry.status}`} fill={COLORS[entry.status]} />
