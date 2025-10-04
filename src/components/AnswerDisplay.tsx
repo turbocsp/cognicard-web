@@ -1,5 +1,3 @@
-// src/components/AnswerDisplay.tsx
-
 interface AnswerDisplayProps {
   deckType?: "general" | "right_wrong";
   answerText: string | null;

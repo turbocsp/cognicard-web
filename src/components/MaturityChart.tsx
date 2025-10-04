@@ -6,6 +6,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  type PieLabelRenderProps,
 } from "recharts";
 import { supabase } from "../supabaseClient";
 
@@ -65,8 +66,8 @@ const MaturityChart = () => {
           fill="#8884d8"
           dataKey="count"
           nameKey="status"
-          label={({ percent }: { percent: number }) =>
-            `${(percent * 100).toFixed(0)}%`
+          label={(props: PieLabelRenderProps) =>
+            `${(Number(props.percent) * 100).toFixed(0)}%`
           }
         >
           {data.map((entry) => (

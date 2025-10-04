@@ -1,12 +1,11 @@
+import { useState, useEffect, type SVGProps } from "react";
 import HeatMap from "@uiw/react-heat-map";
 import Tooltip from "@uiw/react-tooltip";
 import { supabase } from "../supabaseClient";
 import { subYears, subMonths, format, startOfDay, endOfDay } from "date-fns";
 import { useAuth } from "../context/AuthContext";
 import useMeasure from "react-use-measure";
-import { useState, useEffect } from "react";
 
-// Tipo para os dados renderizados no tooltip
 type HeatmapData = {
   date: string;
   count: number;
@@ -65,7 +64,7 @@ const ActivityHeatmap = () => {
     if (width > 0) {
       fetchActivityData();
     }
-  }, [session, width]);
+  }, [session, width, today]);
 
   if (loading) {
     return (
@@ -93,10 +92,7 @@ const ActivityHeatmap = () => {
             10: "#30a14e",
             20: "#216e39",
           }}
-          rectRender={(
-            props: React.SVGProps<SVGRectElement>,
-            data: HeatmapData
-          ) => {
+          rectRender={(props: SVGProps<SVGRectElement>, data: HeatmapData) => {
             if (!data.date) return <rect {...props} />;
             const dateObj = new Date(data.date);
             const userOffset = dateObj.getTimezoneOffset() * 60000;

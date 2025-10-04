@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import ForecastChart from "../components/ForecastChart";
 import MaturityChart from "../components/MaturityChart";
@@ -11,8 +11,7 @@ import MoveDeckModal from "../components/MoveDeckModal";
 import MoveFolderModal from "../components/MoveFolderModal";
 import InlineEdit from "../components/InlineEdit";
 import { toast } from "../components/Notifier";
-import ContextMenu from "../components/ContextMenu";
-import type { MenuItem } from "../components/ContextMenu";
+import ContextMenu, { type MenuItem } from "../components/ContextMenu";
 
 // Interfaces para a estrutura de dados
 interface Deck {

@@ -29,7 +29,7 @@ const BadgesDisplay = () => {
         console.error("Error fetching user badges:", error);
       } else {
         const userBadges = data
-          .map((item) => item.badges)
+          .flatMap((item) => item.badges)
           .filter((badge): badge is Badge => badge !== null);
         setBadges(userBadges);
       }

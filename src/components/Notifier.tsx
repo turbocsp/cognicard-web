@@ -1,25 +1,12 @@
-import React from "react";
-// Separa a importação do TIPO das importações de componentes/funções.
-import type { ToastOptions } from "react-hot-toast";
-import { toast, Toaster } from "react-hot-toast";
+import toast, { Toaster, type ToastOptions } from "react-hot-toast";
 
-// Objeto de configuração para a aparência dos toasts.
+// Correção: A configuração de estilo para tipos específicos (success, error)
+// não é feita no objeto principal, mas sim ao chamar a função toast.
+// Mantemos aqui um estilo base para todos os toasts.
 const toastOptions: ToastOptions = {
   style: {
     background: "#333",
     color: "#fff",
-  },
-  success: {
-    iconTheme: {
-      primary: "#10B981", // green-500
-      secondary: "#fff",
-    },
-  },
-  error: {
-    iconTheme: {
-      primary: "#EF4444", // red-500
-      secondary: "#fff",
-    },
   },
 };
 
