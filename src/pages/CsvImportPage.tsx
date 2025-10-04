@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Papa, { ParseResult } from "papaparse";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "../components/Notifier";
 
 interface CardToInsert {
   deck_id: string;
@@ -70,8 +71,8 @@ const CsvImportPage = () => {
         setIsProcessing(false);
         if (results.errors.length) {
           const firstError = results.errors[0];
-          alert(
-            `Erro ao ler o arquivo na linha ${firstError.row}:\nCódigo: ${firstError.code}\nMensagem: ${firstError.message}`
+          toast.error(
+            `Erro ao ler o arquivo na linha ${firstError.row}: ${firstError.message}`
           );
           return;
         }
@@ -107,8 +108,8 @@ const CsvImportPage = () => {
             (e) => e.code !== "TooManyFields" && e.code !== "TooFewFields"
           );
           if (criticalErrors.length > 0) {
-            alert(
-              `Seu arquivo CSV parece ter erros de formatação que impedem a leitura. Por favor, verifique o arquivo e tente novamente.`
+            toast.error(
+              `Seu arquivo CSV parece ter erros de formatação que impedem a leitura.`
             );
             return;
           }
@@ -123,7 +124,7 @@ const CsvImportPage = () => {
     const errors: string[] = [];
     const cards: CardToInsert[] = [];
     if (!deckId || !session?.user.id) {
-      alert("Erro: Não foi possível identificar o usuário ou o baralho.");
+      toast.error("Erro: Não foi possível identificar o usuário ou o baralho.");
       return;
     }
     const mappedFields = Object.values(mappings);
@@ -178,7 +179,7 @@ const CsvImportPage = () => {
     setIsProcessing(true);
     const { error } = await supabase.from("smart_cards").insert(cardsToInsert);
     if (error) {
-      alert("Ocorreu um erro ao salvar os cartões: " + error.message);
+      toast.error("Ocorreu um erro ao salvar os cartões: " + error.message);
     } else {
       if (cardsToInsert.length >= 50) {
         supabase
@@ -188,7 +189,7 @@ const CsvImportPage = () => {
               console.error("Error awarding import badge:", badgeError);
           });
       }
-      alert(`${cardsToInsert.length} cartões importados com sucesso!`);
+      toast.success(`${cardsToInsert.length} cartões importados com sucesso!`);
       navigate(`/decks/${deckId}`);
     }
     setIsProcessing(false);

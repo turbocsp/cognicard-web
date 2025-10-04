@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "../components/Notifier";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ const LoginPage = () => {
       password,
     });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
       navigate("/dashboard");
     }

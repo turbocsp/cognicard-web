@@ -3,6 +3,8 @@ import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import TimeInput from "../components/TimeInput"; // Importar o novo componente
+import ConfirmationModal from "../components/ConfirmationModal";
+import { toast } from "../components/Notifier";
 
 interface SrsSettings {
   lapse_interval_minutes: number;
@@ -25,7 +27,7 @@ const SettingsPage = () => {
   const [settings, setSettings] = useState<SrsSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -39,6 +41,7 @@ const SettingsPage = () => {
 
       if (error && error.code !== "PGRST116") {
         console.error("Error fetching settings:", error);
+        toast.error("Não foi possível carregar as configurações.");
       } else if (data) {
         setSettings(data);
       }
@@ -69,44 +72,35 @@ const SettingsPage = () => {
     e.preventDefault();
     if (!session) return;
     setIsSaving(true);
-    setSaveMessage(null);
 
     const { error } = await supabase
       .from("user_srs_settings")
       .upsert({ user_id: session.user.id, ...settings });
 
     if (error) {
-      alert(`Erro ao salvar: ${error.message}`);
-      setSaveMessage("Erro ao salvar as configurações.");
+      toast.error(`Erro ao salvar: ${error.message}`);
     } else {
-      setSaveMessage("Configurações salvas com sucesso!");
+      toast.success("Configurações salvas com sucesso!");
     }
     setIsSaving(false);
-    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   const handleResetToDefaults = async () => {
     if (!session) return;
-    if (
-      window.confirm(
-        "Tem certeza de que deseja reverter para as configurações padrão?"
-      )
-    ) {
-      setIsSaving(true);
-      const { error } = await supabase
-        .from("user_srs_settings")
-        .delete()
-        .eq("user_id", session.user.id);
+    setIsResetModalOpen(false); // Fecha o modal antes de processar
+    setIsSaving(true);
+    const { error } = await supabase
+      .from("user_srs_settings")
+      .delete()
+      .eq("user_id", session.user.id);
 
-      if (error) {
-        alert(`Erro ao reverter: ${error.message}`);
-      } else {
-        setSettings(DEFAULT_SETTINGS);
-        setSaveMessage("Configurações revertidas para o padrão.");
-      }
-      setIsSaving(false);
-      setTimeout(() => setSaveMessage(null), 3000);
+    if (error) {
+      toast.error(`Erro ao reverter: ${error.message}`);
+    } else {
+      setSettings(DEFAULT_SETTINGS);
+      toast.success("Configurações revertidas para o padrão.");
     }
+    setIsSaving(false);
   };
 
   if (loading) {
@@ -222,15 +216,12 @@ const SettingsPage = () => {
           <div className="flex justify-between items-center pt-4 border-t dark:border-gray-700">
             <button
               type="button"
-              onClick={handleResetToDefaults}
+              onClick={() => setIsResetModalOpen(true)}
               className="text-sm text-gray-500 hover:underline"
             >
               Reverter para o Padrão
             </button>
             <div className="flex items-center gap-4">
-              {saveMessage && (
-                <span className="text-sm text-green-500">{saveMessage}</span>
-              )}
               <button
                 type="submit"
                 disabled={isSaving}
@@ -242,6 +233,13 @@ const SettingsPage = () => {
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={handleResetToDefaults}
+        title="Reverter Configurações"
+        message="Tem certeza de que deseja reverter para as configurações padrão? Esta ação não pode ser desfeita."
+      />
     </div>
   );
 };

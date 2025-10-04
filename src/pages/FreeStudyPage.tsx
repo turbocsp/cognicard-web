@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient";
 import { calculateNextIntervals, formatInterval } from "../utils/srs";
 import AnswerDisplay from "../components/AnswerDisplay";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "../components/Notifier";
 
 interface Card {
   id: string;
@@ -36,7 +37,7 @@ const DEFAULT_SETTINGS: SrsSettings = {
 };
 
 const FreeStudyPage = () => {
-  const { deckId } = useParams<{ deckId: string }>(); // LINHA CORRIGIDA
+  const { deckId } = useParams<{ deckId: string }>();
   const { session } = useAuth();
   const [deck, setDeck] = useState<Deck | null>(null);
   const [cardsToReview, setCardsToReview] = useState<Card[]>([]);
@@ -77,12 +78,12 @@ const FreeStudyPage = () => {
       ] = await Promise.all([settingsPromise, deckPromise, cardsPromise]);
 
       if (settingsError && settingsError.code !== "PGRST116")
-        alert(settingsError.message);
+        toast.error(settingsError.message);
       else if (settingsData) setUserSrsSettings(settingsData);
 
-      if (deckError) alert(deckError.message);
+      if (deckError) toast.error(deckError.message);
       else setDeck(deckData as Deck);
-      if (cardsError) alert(cardsError.message);
+      if (cardsError) toast.error(cardsError.message);
       else {
         setCardsToReview(cardsData || []);
         if (!cardsData || cardsData.length === 0) setSessionFinished(true);
@@ -137,7 +138,7 @@ const FreeStudyPage = () => {
       if (error) throw error;
       goToNextCard();
     } catch (error: any) {
-      alert(error.message);
+      toast.error(error.message);
       goToNextCard();
     }
   };

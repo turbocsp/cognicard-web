@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Link } from "react-router-dom";
+import { toast } from "../components/Notifier";
 
 const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -13,9 +14,11 @@ const SignUpPage = () => {
     setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
-      alert("Cadastro realizado! Verifique seu e-mail para confirmar a conta.");
+      toast.success(
+        "Cadastro realizado! Verifique seu e-mail para confirmar a conta."
+      );
     }
     setLoading(false);
   };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
-import { differenceInCalendarDays, startOfDay } from "date-fns";
 
 const StreakCounter = () => {
   const { session } = useAuth();
@@ -9,69 +8,37 @@ const StreakCounter = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const calculateStreak = (reviewDates: Date[]): number => {
-      if (reviewDates.length === 0) return 0;
-      let currentStreak = 0;
-      const today = startOfDay(new Date());
-      const sortedDates = reviewDates.sort((a, b) => b.getTime() - a.getTime());
-
-      if (
-        differenceInCalendarDays(today, sortedDates[0]) === 0 ||
-        differenceInCalendarDays(today, sortedDates[0]) === 1
-      ) {
-        currentStreak = 1;
-        for (let i = 0; i < sortedDates.length - 1; i++) {
-          const diff = differenceInCalendarDays(
-            sortedDates[i],
-            sortedDates[i + 1]
-          );
-          if (diff === 1) {
-            currentStreak++;
-          } else if (diff > 1) {
-            break;
-          }
-        }
-      }
-      return currentStreak;
-    };
-
-    const fetchStreaks = async () => {
+    const fetchStreak = async () => {
       if (!session) {
         setLoading(false);
         return;
       }
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("review_log")
-        .select("reviewed_at");
+      // Chama a nova função RPC no backend em vez de buscar todos os logs
+      const { data, error } = await supabase.rpc("calculate_user_streak", {
+        p_user_id: session.user.id,
+      });
 
       if (error) {
-        console.error("Error fetching review logs for streak:", error);
+        console.error("Error fetching streak:", error);
       } else {
-        const uniqueDays = [
-          ...new Set(
-            data.map((log) =>
-              startOfDay(new Date(log.reviewed_at)).toISOString()
-            )
-          ),
-        ];
-        const reviewDates = uniqueDays.map((day) => new Date(day));
-        const calculatedStreak = calculateStreak(reviewDates);
+        const calculatedStreak = data || 0;
         setStreak(calculatedStreak);
 
         if (calculatedStreak >= 7) {
           supabase
             .rpc("award_badge_if_not_present", { p_badge_id: "streak_7" })
-            .then(({ error }) => {
-              if (error) console.error("Error awarding streak badge:", error);
+            .then(({ error: badgeError }) => {
+              if (badgeError)
+                console.error("Error awarding streak badge:", badgeError);
             });
         }
       }
       setLoading(false);
     };
 
-    fetchStreaks();
+    fetchStreak();
   }, [session]);
 
   if (loading) {

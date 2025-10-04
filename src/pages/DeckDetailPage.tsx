@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "../components/Notifier";
 
 interface Card {
   id: string;
@@ -48,11 +49,14 @@ const DeckDetailPage = () => {
         { data: deckData, error: deckError },
         { data: cardsData, error: cardsError },
       ] = await Promise.all([deckPromise, cardsPromise]);
-      if (deckError) console.error("Error fetching deck:", deckError.message);
-      else setDeck(deckData);
-      if (cardsError)
+      if (deckError) {
+        console.error("Error fetching deck:", deckError.message);
+        toast.error("Erro ao carregar o baralho.");
+      } else setDeck(deckData);
+      if (cardsError) {
         console.error("Error fetching cards:", cardsError.message);
-      else setCards(cardsData || []);
+        toast.error("Erro ao carregar os cartões.");
+      } else setCards(cardsData || []);
       setLoading(false);
     };
     fetchData();
@@ -89,7 +93,7 @@ const DeckDetailPage = () => {
       .single();
 
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else if (data) {
       setCards([...cards, data]);
       setFrontContent("");
@@ -97,6 +101,7 @@ const DeckDetailPage = () => {
       setTheoryNotes("");
       setSourceReferences("");
       setTags("");
+      toast.success("Cartão adicionado com sucesso!");
     }
     setIsSubmitting(false);
   };
