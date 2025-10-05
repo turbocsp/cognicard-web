@@ -399,13 +399,7 @@ const DashboardPage = () => {
 
   // --- SUB-COMPONENTES E HELPERS ---
 
-  const FileSystemNode = ({
-    node,
-    depth,
-  }: {
-    node: TreeNode;
-    depth: number;
-  }): JSX.Element => {
+  const FileSystemNode = ({ node, depth }: { node: TreeNode }): JSX.Element => {
     const isEditing = editingItemId === node.id;
 
     const handleContextMenu = (e: React.MouseEvent) => {
