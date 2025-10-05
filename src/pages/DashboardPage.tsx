@@ -405,7 +405,7 @@ const DashboardPage = () => {
   }: {
     node: TreeNode;
     depth: number;
-  }): JSX.Element => {
+  }): React.JSX.Element => {
     const isEditing = editingItemId === node.id;
 
     const handleContextMenu = (e: React.MouseEvent) => {
@@ -568,8 +568,11 @@ const DashboardPage = () => {
     return items;
   };
 
-  const renderFolderOptions = (nodes: TreeNode[], depth = 0): JSX.Element[] => {
-    let options: JSX.Element[] = [];
+  const renderFolderOptions = (
+    nodes: TreeNode[],
+    depth = 0
+  ): React.JSX.Element[] => {
+    let options: React.JSX.Element[] = [];
     nodes.forEach((node) => {
       if (node.type === "folder") {
         options.push(
