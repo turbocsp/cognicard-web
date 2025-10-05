@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import Papa, { ParseResult } from "papaparse";
+import Papa, { type ParseResult } from "papaparse";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "../components/Notifier";
@@ -72,7 +72,7 @@ const CsvImportPage = () => {
         if (results.errors.length) {
           const firstError = results.errors[0];
           toast.error(
-            `Erro ao ler o arquivo na linha ${firstError.row}: ${firstError.message}`
+            `Erro ao ler o arquivo na linha ${firstError.row}:\n${firstError.message}`
           );
           return;
         }
@@ -109,7 +109,7 @@ const CsvImportPage = () => {
           );
           if (criticalErrors.length > 0) {
             toast.error(
-              `Seu arquivo CSV parece ter erros de formatação que impedem a leitura.`
+              `Seu arquivo CSV parece ter erros de formatação que impedem a leitura. Por favor, verifique o arquivo e tente novamente.`
             );
             return;
           }
